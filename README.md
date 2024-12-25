@@ -1,17 +1,6 @@
-# V2PE: Improving Multimodal Long-Context Capability of Vision-Language Models with Variable Visual Position Encoding
+# LongVLM Training
 
-The official implementation of the paper "[V2PE: Improving Multimodal Long-Context Capability of Vision-Language Models with Variable Visual Position Encoding](https://arxiv.org/abs/2412.09616)". 
-
-<div align="center">
-    <img src="assets/fig1_hf_00.png" alt="drawing" width="600"/>
-</div>
-
-<div align="center">
-
-[\[🆕 Blog\]](https://zzdhybthu.github.io/V2PE.github.io)  [\[📜 ArXiv Paper\]](https://arxiv.org/abs/2412.09616)  [\[🤗 HF Models\]](https://huggingface.co/OpenGVLab/V2PE)  [\[📖 HF Datasets\]](https://huggingface.co/datasets/OpenGVLab/V2PE-Data)
-
-</div>
-
+We adopt the official implementation of the paper "[V2PE: Improving Multimodal Long-Context Capability of Vision-Language Models with Variable Visual Position Encoding](https://arxiv.org/abs/2412.09616)". 
 
 ## 📖 Summary
 
@@ -39,142 +28,20 @@ In addition, using this codebase requires executing the following steps:
 Our models are built from InternVL2-2B.
 Please download the above model weights and place them in the `pretrained/` folder.
 
-
-| model name              | type | download                                                               |  size  |
-| ----------------------- |------| ---------------------------------------------------------------------- |:------:|
-| InternVL2-2B    | VLM  | 🤗 [HF link](https://huggingface.co/OpenGVLab/InternVL2-2B) | 4.4 GB |
-
-
 ```sh
 cd pretrained/
 # pip install -U huggingface_hub
-huggingface-cli download --resume-download --local-dir-use-symlinks False OpenGVLab/InternVL2-2B --local-dir InternVL2-2B
+huggingface-cli download --resume-download --local-dir-use-symlinks False OpenGVLab/InternVL2-8B --local-dir InternVL2-8B
 ```
 
 The directory structure is:
 
 ```sh
 pretrained
-└── InternVL2-2B/
+└── InternVL2-8B/
 ```
 
 ## 🔥 Supervised Fine-tuning
-
-### Prepare Training Datasets
-
-1. Download training and validation dataset from [HuggingFace](https://huggingface.co/datasets/OpenGVLab/V2PE-Data)
-
-2. Organize the data as follows in `dataset/`:
-
-    ```none
-    dataset
-    ├── annotation
-    │   ├── long_mr_128k/
-    │   ├── long_mr_256k/
-    │   ├── long_mr_32k/
-    │   ├── long_vqa_32k/
-    │   ├── milebench_16k/
-    │   └── milebench_nh/
-    ├── image
-    │   ├── long_mr
-    │   │   ├── train/
-    │   │   └── val/
-    │   ├── long_vqa
-    │   │   ├── image
-    │   │   │   ├── deepform
-    │   │   │   │   ├── train/
-    │   │   │   │   └── val/
-    │   │   │   ├── docvqa
-    │   │   │   │   ├── train/
-    │   │   │   │   └── val/
-    │   │   │   ├── infovqa
-    │   │   │   │   ├── train/
-    │   │   │   │   └── val/
-    │   │   │   ├── kleistercharity
-    │   │   │   │   ├── train/
-    │   │   │   │   └── val/
-    │   │   │   ├── svqa
-    │   │   │   │   ├── train/
-    │   │   │   │   └── val/
-    │   │   │   └── visualmrc
-    │   │   │       ├── train/
-    │   │   │       └── val/
-    │   │   └── paste
-    │   │       ├── chartqa
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── clevr
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── dvqa
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── gqa
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── ocrvqa
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── okvqa
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── tabfact
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── textcaps
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── textvqa
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       ├── vizwiz
-    │   │       │   ├── train/
-    │   │       │   └── val/
-    │   │       └── wikitablequestions
-    │   │           ├── train/
-    │   │           └── val/
-    │   └── milebench
-    │       ├── clevr
-    │       │   └── train/
-    │       ├── gpr
-    │       │   └── train/
-    │       ├── iedit
-    │       │   └── train/
-    │       ├── mmcoqa
-    │       │   └── train/
-    │       ├── mmqa
-    │       │   └── train/
-    │       ├── nh
-    │       │   └── train/
-    │       ├── objintercn
-    │       │   └── train/
-    │       ├── ocrvqa
-    │       │   └── train/
-    │       ├── percept
-    │       │   └── train/
-    │       ├── slidevqa
-    │       │   └── train/
-    │       ├── spotdiff
-    │       │   └── train/
-    │       ├── sta_charades
-    │       │   └── train/
-    │       ├── star
-    │       │   └── train/
-    │       ├── tqa
-    │       │   └── train/
-    │       └── webqa
-    │           └── train/
-    └── val
-        ├── long_mr_128k/
-        ├── long_mr_1m/
-        ├── long_mr_256k/
-        ├── long_mr_512k/
-        ├── long_vqa_32k/
-        ├── long_vqa_40k/
-        ├── long_vqa_48k/
-        ├── long_vqa_56k/
-        └── long_vqa_64k/
-    ```
 
 ### Start Training
 
@@ -200,50 +67,6 @@ You can run this script with the following command:
 # using 32 GPUs
 PARTITION='your partition' GPUS=32 sh shell/internlm2_2b/internvl_chat_v2_internlm2_2b_dynamic_res_v2pe_256k.sh
 ```
-## 📊 Evaluation
-### Evaluation results in paper
-**General MLLM Benchmarks**
-
-![img.png](assets/general_mllm_benchmarks.png)
-
-**Long-Context MLLM Benchmarks**
-
-![img.png](assets/long_mllm_benchmarks.png)
-
-### Evaluation results of our [released model](https://huggingface.co/OpenGVLab/V2PE)
-
-After organizing our codebase and training a released model, we renewed our evaluation results of the released model as follows:
-
-**General MLLM Benchmarks**
-
-| Model                     | #Param | ChartQA | DocVQA | AI2D  | InfoVQA | SQA   | POPE  | MMMU<sub>val</sub> | MMBench<sub>EN</sub> | SEED<sub>I</sub> | Avg   |
-|---------------------------|--------|---------|--------|-------|---------|-------|-------|--------------------|---------------------|------------------|-------|
-| InternVL2-2B  | 2.0B   | 71.7    | 86.9   | 74.1  | 58.9    | 94.1  | 85.2  | 36.3               | 73.4                | 70.9             | 72.4  |
-| DeepSeek-VL-1.3B | 2.0B   | 47.4    | -      | 51.5  | -       | 68.4  | 85.9  | 33.8               | 66.4                | 66.0             | -     |
-| Qwen2-VL-2B  | 2.0B   | 73.5    | 90.1   | 74.7  | 65.5    | -     | -     | 41.1               | 74.9                | -                | -     |
-| Aquila-VL-2B  | 2.2B   | 32.0    | 85.0   | 75.1  | 58.3    | 95.1  | 83.1  | 46.9               | 79.0                | 73.9             | 69.8  |
-| MiniCPM-V-2  | 2.8B   | 55.6    | 71.9   | 62.9  | -       | 80.7  | 86.3  | 38.2               | 64.1                | 67.1             | -     |
-| Vintern-3B-beta  | 3.7B   | 68.3    | -      | 69.1  | -       | 75.0  | 87.4  | 46.7               | 70.6                | 70.0             | -     |
-| Llama 3.2 11B   | 11B    | 83.4    | 88.4   | 91.1  | -       | -     | -     | 50.7               | 68.0                | -                | -     |
-| Qwen2-VL-72B  | 73B    | 88.3    | 96.5   | 88.1  | 84.5    | 91.2  | 87.2  | 64.5               | 86.9                | 77.9             | 85.0  |
-| GPT-4o | -      | 85.7    | 92.8   | 84.7  | -       | 90.1  | 97.2  | 69.1               | 82.1                | 76.7             | -     |
-| **InternVL2-V2PE-32K**    | 2.0B   | **76.4** | **83.9** | **73.2** | **55.9**  | **94.9** | **88.8**  | **36.6**             | **73.5**            | **71.2**          | **72.5** |
-
-**Long-Context MLLM Benchmarks**
-
-| Model                     | #Param | MM-NIAH/Image | MM-NIAH/Text | MM-NIAH/Avg | Milebench/T  | Milebench/S  | Milebench/NI | Milebench/Avg | VideoMME   | MVBench   |
-|--------------------------|--------|---------------|--------------|-------------|--------------|--------------|---------------|--------------|------------|------------|
-| InternVL2-2B            | 2.0B   | 23.0          | 18.9         | 21.0        | 58.2         | 54.5         | 37.0          | 49.9         | -      | -      |
-| Phi-3-Vision            | 2.7B   | -         | -        | -       | 46.9         | 50.0         | -         | -         | -      | -      |
-| OmChat                  | 3.9B   | -         | -        | -       | 51.4         | 52.0         | -         | -         | 45.9       | 50.2       |
-| LongLLaVA               | 9B     | -         | -        | -       | 47.3         | 46.8         | -         | -         | 43.7       | 49.1       |
-| LongLLaVA               | 13B    | -         | -        | -       | 52.7         | 52.1         | -         | -         | 51.6       | 54.6       |
-| VILA                    | 13B    | 14.5          | 40.5         | 27.5        | -        | -        | -         | -         | -      | -      |
-| Gemini-1.5              | -  | 28.5          | 82.1         | 55.2        | 50.2         | 58.3         | 97.9          | **68.8**     | **69.6**   | -      |
-| GPT-4V                  | -  | -         | 84.1     | -       | 45.6         | 58.9         | **99.4**      | 68.0         | 59.9       | 43.5       |
-| GPT-4o                  | -  | -         | -        | -       | 56.2         | **63.5**     | -         | -         | 64.7       | -      |
-| Claude3-Opus            | -  | -         | -        | -       | 37.4         | 48.1         | 85.3          | 56.9         | 59.7       | -      |
-| **InternVL2-V2PE-32K**  | 2.0B   | **78.1**      | **85.7**      | **81.8**    | **65.5**     | 56.4        | 97.2    | 72.5      | 50.7      | **65.6** |
 
 ## ❓ How to Evaluate
 
