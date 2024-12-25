@@ -1,0 +1,9 @@
+{
+    "VisualWebInstruct": {
+        "root": "/data/wenhu/V2PE/dataset/image/visual_webinstruct/train",
+        "annotation": "/data/wenhu/V2PE/dataset/train_visual_webinstruct.jsonl",
+        "data_augment": true,
+        "repeat_time": 1,
+        "length": 24000
+    }
+}

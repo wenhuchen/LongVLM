@@ -49,7 +49,6 @@ def pad_data_collator(features, pad_id=0):
 
 
 def concat_pad_data_collator(features, max_item_length=None, pad_id=0):
-
     first = features[0]
     batch = {}
     batch_lens = [feat['input_ids'].shape for feat in features]
@@ -65,11 +64,9 @@ def concat_pad_data_collator(features, max_item_length=None, pad_id=0):
         feat['attention_mask'] = feat['input_ids'].ne(pad_id)
 
         if 'position_ids' in feat:
-            
             if isinstance(feat['position_ids'],list):
                 temp_position_ids = [pad_id] * max_item_length
                 temp_position_ids[:len(feat['position_ids'])] = feat['position_ids']
-                
             else:
                 temp_position_ids = [pad_id] * max_item_length
                 temp_position_ids[:feat['position_ids'].shape[0]] = feat['position_ids']

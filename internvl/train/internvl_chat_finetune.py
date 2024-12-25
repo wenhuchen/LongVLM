@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from functools import partial
 from typing import Dict, Optional
 import hashlib
+sys.path.append('.')
 
 import numpy as np
 import orjson as json
@@ -362,12 +363,12 @@ class LazySupervisedDataset(Dataset):
         self.num_image_token = num_image_token
         self.rope_pos_id_version = rope_pos_id_version
         self.rope_pos_id_stride = rope_pos_id_stride
-        print(f'[Dataset] num_image_token: {num_image_token}')
-        print(f'[Dataset] dynamic_image_size: {dynamic_image_size}')
-        print(f'[Dataset] use_thumbnail: {use_thumbnail}')
-        print(f'[Dataset] min_dynamic_patch: {min_dynamic_patch}, max_dynamic_patch: {max_dynamic_patch}')
-        print(f'[Dataset] rope_pos_id_version: {rope_pos_id_version}')
-        print(f'[Dataset] rope_pos_id_stride: {rope_pos_id_stride}')
+        print(f'[LazySupervisedDataset] num_image_token: {num_image_token}')
+        print(f'[LazySupervisedDataset] dynamic_image_size: {dynamic_image_size}')
+        print(f'[LazySupervisedDataset] use_thumbnail: {use_thumbnail}')
+        print(f'[LazySupervisedDataset] min_dynamic_patch: {min_dynamic_patch}, max_dynamic_patch: {max_dynamic_patch}')
+        print(f'[LazySupervisedDataset] rope_pos_id_version: {rope_pos_id_version}')
+        print(f'[LazySupervisedDataset] rope_pos_id_stride: {rope_pos_id_stride}')
 
         self.image_size = image_size
         self.is_train = is_train
@@ -934,9 +935,7 @@ class LazySupervisedDataset(Dataset):
 
         for i in range(start_idx, len(self)):
             samples_processed += 1
-
             self._update_samples_processed_file(samples_processed)
-
             yield self[i]
 
     def _update_samples_processed_file(self, samples_processed):
@@ -1085,8 +1084,7 @@ def len2weight(x, loss_reduction):
 
 
 def main():
-
-    launcher = os.environ.get('LAUNCHER', 'slurm')
+    launcher = os.environ.get('LAUNCHER', 'pytorch')
     init_dist(launcher=launcher, backend='nccl')
 
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
@@ -1184,8 +1182,6 @@ def main():
         replace_llama_attention_class()
     elif model_args.attn_type is None:
         model_args.attn_type = 'packed'
-    elif model_args.attn_type is None:
-        model_args.attn_type = 'packed'
 
     if model_args.model_name_or_path is not None:
         logger.info('Loading InternVLChatModel...')
@@ -1229,7 +1225,6 @@ def main():
         model.attn_type = model_args.attn_type
         model.language_model.model.init_interactions(model_args.compress_seq, model_args.fuse_method, model_args.compress_method)
         model.init_embed()
-
     else:
         logger.info('Loading ViT-6B...')
         vision_config = InternVisionConfig.from_pretrained(model_args.vision_path)
@@ -1421,6 +1416,7 @@ def main():
         )
     else:
         collator = concat_pad_data_collator
+
     if use_chunkTrainer:
         trainer = chunkTrainer(
             model=model,
@@ -1433,7 +1429,7 @@ def main():
             group_list=group_list,
         )
     else:
-        # training_args.dataloader_num_workers = 0
+        training_args.dataloader_num_workers = 0
         trainer = Trainer(
             model=model,
             args=training_args,

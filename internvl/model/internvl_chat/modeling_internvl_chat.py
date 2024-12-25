@@ -65,6 +65,7 @@ class GatherLayer(torch.autograd.Function):
         grad_out = torch.zeros_like(input)
         grad_out[:] = grads[dist.get_rank(local_group)]
         return grad_out
+
 class InternVLChatModel(PreTrainedModel):
     config_class = InternVLChatConfig
     main_input_name = 'pixel_values'
@@ -223,8 +224,6 @@ class InternVLChatModel(PreTrainedModel):
                 vit_embeds = self.extract_feature(pixel_values)
         else:
             vit_embeds = self.extract_feature(pixel_values)
-        
-
 
         vit_embeds = vit_embeds[image_flags == 1]
         vit_batch_size = pixel_values.shape[0]

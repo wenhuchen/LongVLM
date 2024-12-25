@@ -73,6 +73,7 @@ class InternLM2FlashAttention2ForPackedTraining(InternLM2FlashAttention2):
         key_states = key_states.unsqueeze(0)
         value_states = value_states.unsqueeze(0)
         return attn_output
+
 class InternLM2RingAttention2ForPackedTraining(InternLM2FlashAttention2):
     def _flash_attention_forward(
             self, query_states, key_states, value_states, attention_mask, query_length, dropout=0.0, softmax_scale=None,group=None

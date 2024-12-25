@@ -454,6 +454,7 @@ class PackedDataset(IterableDataset):
             f'Worker {worker_id} begin to load data'
         )
 
+        # import pdb; pdb.set_trace()
         while True:
             self.dataset_weight = [w / sum(self.dataset_weight) for w in self.dataset_weight]
             current_dataset_idx = rng.choice(len(self.dataset_iter_list), p=self.dataset_weight)
@@ -601,7 +602,7 @@ def packed_collate_fn(
         feat['loss_weight'] = curr_loss_weight
 
         if feat_idx < num_features:
-            num_samples += len(curr_cu_seqlens) - 1
+             num_samples += len(curr_cu_seqlens) - 1
 
         if curr_cu_seqlens[-1] < max_item_length:
             curr_cu_seqlens.append(max_item_length)
