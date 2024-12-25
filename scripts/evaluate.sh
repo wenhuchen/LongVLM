@@ -8,13 +8,10 @@ echo "CHECKPOINT: ${CHECKPOINT}"
 
 MASTER_PORT=${MASTER_PORT:-63669}
 PORT=${PORT:-63665}
-GPUS=${GPUS:-8}
-GPUS_PER_NODE=${GPUS_PER_NODE:-8}
-NODES=$((GPUS / GPUS_PER_NODE))
+GPUS=${GPUS:-1}
 export MASTER_PORT=${MASTER_PORT}
 export PORT=${PORT}
 
-# Save original arguments
 ARGS=("$@")
 
 # Parse options

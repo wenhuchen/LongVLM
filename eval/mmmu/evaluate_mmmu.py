@@ -16,8 +16,6 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-cache_dir = "/mnt/petrelfs/wangweiyun/workspace_zyc/.cache/MMMU"
-
 ds_collections = {
     'MMMU_validation': {
         'root': 'MMMU/MMMU',
@@ -56,7 +54,7 @@ class MMMUDataset(torch.utils.data.Dataset):
         # run for each subject
         sub_dataset_list = []
         for subject in tqdm(CAT_SHORT2LONG.values()):
-            sub_dataset = load_dataset(root, subject, split=split, cache_dir=cache_dir)
+            sub_dataset = load_dataset(root, subject, split=split)
             sub_dataset_list.append(sub_dataset)
 
         # merge all dataset
