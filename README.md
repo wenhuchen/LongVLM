@@ -1,17 +1,6 @@
-# V2PE: Improving Multimodal Long-Context Capability of Vision-Language Models with Variable Visual Position Encoding
+# LongVLM Training
 
-The official implementation of the paper "[V2PE: Improving Multimodal Long-Context Capability of Vision-Language Models with Variable Visual Position Encoding](https://arxiv.org/abs/2412.09616)". 
-
-<div align="center">
-    <img src="assets/fig1_hf_00.png" alt="drawing" width="600"/>
-</div>
-
-<div align="center">
-
-[\[🆕 Blog\]](https://zzdhybthu.github.io/V2PE.github.io)  [\[📜 ArXiv Paper\]](https://arxiv.org/abs/2412.09616)  [\[🤗 HF Models\]](https://huggingface.co/OpenGVLab/V2PE)  [\[📖 HF Datasets\]](https://huggingface.co/datasets/OpenGVLab/V2PE-Data)
-
-</div>
-
+We adopt the official implementation of the paper "[V2PE: Improving Multimodal Long-Context Capability of Vision-Language Models with Variable Visual Position Encoding](https://arxiv.org/abs/2412.09616)". 
 
 ## 📖 Summary
 
