@@ -10,7 +10,6 @@
 <a href="https://huggingface.co/spaces/opencompass/open_vlm_leaderboard">🤗 HF Leaderboard</a> •
 <a href="https://huggingface.co/datasets/VLMEval/OpenVLMRecords">🤗 Evaluation Records</a> •
 <a href="https://huggingface.co/spaces/opencompass/openvlm_video_leaderboard">🤗 HF Video Leaderboard</a> •
-<a href="https://discord.gg/evDT4GZmxN">🔊 Discord</a> •
 <a href="https://www.arxiv.org/abs/2407.11691">📝 Report</a>
 </div>
 
@@ -33,7 +32,7 @@
 
 ## 🏗️ QuickStart
 
-See [QuickStart](https://raw.githubusercontent.com/wenhuchen/LongVLM/refs/heads/main/VLMEvalKit/docs/en/Quickstart.md) for a quick start guide.
+See [QuickStart](https://github.com/wenhuchen/LongVLM/blob/main/VLMEvalKit/docs/en/Quickstart.md) for a quick start guide.
 
 ## 📊 Datasets, Models, and Evaluation Results
 
