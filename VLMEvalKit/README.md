@@ -1,7 +1,5 @@
 <b>A Toolkit for Evaluating Large Vision-Language Models. </b>
 
-[![][github-contributors-shield]][github-contributors-link] • [![][github-forks-shield]][github-forks-link] • [![][github-stars-shield]][github-stars-link] • [![][github-issues-shield]][github-issues-link] • [![][github-license-shield]][github-license-link]
-
 <a href="https://rank.opencompass.org.cn/leaderboard-multimodal">🏆 OC Learderboard </a> •
 <a href="#%EF%B8%8F-quickstart">🏗️Quickstart </a> •
 <a href="#-datasets-models-and-evaluation-results">📊Datasets & Models </a> •
