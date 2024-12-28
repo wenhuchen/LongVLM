@@ -117,11 +117,12 @@ class InternLM2Config(PretrainedConfig):
         self.rope_theta = rope_theta
         self.rope_scaling = rope_scaling
         self.scale_img=scale_img
-        self._rope_scaling_validation()
+        # self._rope_scaling_validation()
         
         self.attn_implementation = attn_implementation
         if self.attn_implementation is None:
             self.attn_implementation = 'eager'
+
         super().__init__(
             pad_token_id=pad_token_id,
             bos_token_id=bos_token_id,

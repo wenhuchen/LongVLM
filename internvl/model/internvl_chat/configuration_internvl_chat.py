@@ -58,6 +58,7 @@ class InternVLChatConfig(PretrainedConfig):
             llm_config = {}
             logger.info('llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).')
 
+        # import pdb; pdb.set_trace()
         self.vision_config = InternVisionConfig(**vision_config)
         if llm_config['architectures'][0] == 'LlamaForCausalLM':
             self.llm_config = LlamaConfig(**llm_config)

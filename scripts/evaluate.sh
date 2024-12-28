@@ -329,16 +329,6 @@ if [ ${DATASET} == "mmvet" ]; then
     python eval/mmvet/evaluate_mmvet.py --checkpoint ${CHECKPOINT} --datasets mmvet "${ARGS[@]:2}"
 fi
 
-if [ ${DATASET} == "cmmmu" ]; then
-  CUDA_VISIBLE_DEVICES=0 python eval/cmmmu/evaluate_cmmmu.py --checkpoint ${CHECKPOINT} --datasets art_and_design "${ARGS[@]:2}" &
-  CUDA_VISIBLE_DEVICES=1 python eval/cmmmu/evaluate_cmmmu.py --checkpoint ${CHECKPOINT} --datasets business "${ARGS[@]:2}" &
-  CUDA_VISIBLE_DEVICES=2 python eval/cmmmu/evaluate_cmmmu.py --checkpoint ${CHECKPOINT} --datasets health_and_medicine "${ARGS[@]:2}" &
-  CUDA_VISIBLE_DEVICES=3 python eval/cmmmu/evaluate_cmmmu.py --checkpoint ${CHECKPOINT} --datasets humanities_and_social_sciences "${ARGS[@]:2}" &
-  CUDA_VISIBLE_DEVICES=4 python eval/cmmmu/evaluate_cmmmu.py --checkpoint ${CHECKPOINT} --datasets science "${ARGS[@]:2}" &
-  CUDA_VISIBLE_DEVICES=5 python eval/cmmmu/evaluate_cmmmu.py --checkpoint ${CHECKPOINT} --datasets technology_and_engineering "${ARGS[@]:2}" &
-  wait
-fi
-
 if [ ${DATASET} == "mmbench-dev-en" ]; then
     torchrun \
       --nnodes=1 \
@@ -399,18 +389,8 @@ if [ ${DATASET} == "scienceqa" ]; then
       eval/scienceqa/evaluate_scienceqa.py --checkpoint ${CHECKPOINT} --datasets sqa_test "${ARGS[@]:2}"
 fi
 
-
-if [ ${DATASET} == "mmmu-dev" ]; then
-    torchrun \
-      --nnodes=1 \
-      --node_rank=0 \
-      --master_addr=127.0.0.1 \
-      --nproc_per_node=${GPUS} \
-      --master_port=${MASTER_PORT} \
-      eval/mmmu/evaluate_mmmu.py --checkpoint ${CHECKPOINT} --datasets MMMU_dev "${ARGS[@]:2}"
-fi
-
 if [ ${DATASET} == "mmmu-val" ]; then
+    echo "${ARGS[@]:2}"
     torchrun \
       --nnodes=1 \
       --node_rank=0 \
@@ -430,16 +410,6 @@ if [ ${DATASET} == "mmmu-test" ]; then
       eval/mmmu/evaluate_mmmu.py --checkpoint ${CHECKPOINT} --datasets MMMU_test "${ARGS[@]:2}"
 fi
 
-if [ ${DATASET} == "mmmu-dev-cot" ]; then
-    torchrun \
-      --nnodes=1 \
-      --node_rank=0 \
-      --master_addr=127.0.0.1 \
-      --nproc_per_node=${GPUS} \
-      --master_port=${MASTER_PORT} \
-      eval/mmmu/evaluate_mmmu_cot.py --checkpoint ${CHECKPOINT} --datasets MMMU_dev "${ARGS[@]:2}"
-fi
-
 if [ ${DATASET} == "mmmu-val-cot" ]; then
     torchrun \
       --nnodes=1 \
@@ -447,17 +417,17 @@ if [ ${DATASET} == "mmmu-val-cot" ]; then
       --master_addr=127.0.0.1 \
       --nproc_per_node=${GPUS} \
       --master_port=${MASTER_PORT} \
-      eval/mmmu/evaluate_mmmu_cot.py --checkpoint ${CHECKPOINT} --datasets MMMU_validation "${ARGS[@]:2}"
+      eval/mmmu/evaluate_mmmu.py --checkpoint ${CHECKPOINT} --datasets MMMU_validation --thinking "${ARGS[@]:2}"
 fi
 
-if [ ${DATASET} == "mmmu-test-cot" ]; then
+if [ ${DATASET} == "mmmu-test-cot" ]; thentmu
     torchrun \
       --nnodes=1 \
       --node_rank=0 \
       --master_addr=127.0.0.1 \
       --nproc_per_node=${GPUS} \
       --master_port=${MASTER_PORT} \
-      eval/mmmu/evaluate_mmmu_cot.py --checkpoint ${CHECKPOINT} --datasets MMMU_test "${ARGS[@]:2}"
+      eval/mmmu/evaluate_mmmu.py --checkpoint ${CHECKPOINT} --datasets MMMU_test --thinking "${ARGS[@]:2}"
 fi
 
 

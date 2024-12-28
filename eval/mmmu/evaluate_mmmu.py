@@ -19,21 +19,15 @@ from transformers import AutoTokenizer
 ds_collections = {
     'MMMU_validation': {
         'root': 'MMMU/MMMU',
-        'max_new_tokens': 10,
+        'max_new_tokens': 1000,
         'min_new_tokens': 1,
         'split': 'validation'
     },
     'MMMU_test': {
         'root': 'MMMU/MMMU',
-        'max_new_tokens': 10,
+        'max_new_tokens': 1000,
         'min_new_tokens': 1,
         'split': 'test'
-    },
-    'MMMU_dev': {
-        'root': 'MMMU/MMMU',
-        'max_new_tokens': 10,
-        'min_new_tokens': 1,
-        'split': 'dev'
     },
 }
 
@@ -162,7 +156,11 @@ def post_process(pred, option):
 def evaluate_chat_model():
     prompt = {
         'multiple-choice': "Answer with the option's letter from the given choices directly.",
-        'open': 'Answer the question using a single word or phrase.'
+        'open': "Answer the question using a single word or phrase."
+    }
+    thinking_prompts = {
+        'multiple-choice': "\nThink step by step to derive your answer as `Answer: A/B/C/D`. You should choose only one option. [thinking]",
+        'open': "\nThink step by step to derive your answer. [thinking]"
     }
     random.seed(args.seed)
 
@@ -170,7 +168,7 @@ def evaluate_chat_model():
         dataset = MMMUDataset(
             root=ds_collections[ds_name]['root'],
             split=ds_collections[ds_name]['split'],
-            prompt=prompt,
+            prompt=prompt if not args.thinking else thinking_prompts,
             input_size=image_size,
             dynamic_image_size=args.dynamic,
             use_thumbnail=use_thumbnail,
@@ -178,7 +176,6 @@ def evaluate_chat_model():
         )
 
         if args.rope_pos_id_version == 'default':
-
             dataloader = torch.utils.data.DataLoader(
                 dataset=dataset,
                 sampler=InferenceSampler(len(dataset)),
@@ -258,7 +255,7 @@ def evaluate_chat_model():
                     min_new_tokens=ds_collections[ds_name]['min_new_tokens'],
                     do_sample=True if args.temperature > 0 else False,
                     temperature=args.temperature)
-
+                
                 pred = model.chat(
                     tokenizer=tokenizer,
                     pixel_values=pixel_values,
@@ -272,6 +269,7 @@ def evaluate_chat_model():
                     num_patches_list=num_patches_list[0],
                     rope_pos_id_stride=rope_pos_id_stride
                 )
+                
                 if len(options[0]) == 0:
                     preds = [pred]
                 else:
@@ -337,6 +335,7 @@ if __name__ == '__main__':
     parser.add_argument('--max-num', type=int, default=6)
     parser.add_argument('--load-in-8bit', action='store_true')
     parser.add_argument('--auto', action='store_true')
+    parser.add_argument('--thinking', action='store_true')
     parser.add_argument('--rope_pos_id_version', type=str, default='default')
     parser.add_argument('--rope_pos_id_stride', type=int, default=None)
     args = parser.parse_args()
@@ -361,9 +360,14 @@ if __name__ == '__main__':
         os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
     kwargs = {'device_map': 'auto'} if args.auto else {}
     tokenizer = AutoTokenizer.from_pretrained(args.checkpoint, trust_remote_code=True, use_fast=False)
+
     model = InternVLChatModel.from_pretrained(
-        args.checkpoint, low_cpu_mem_usage=True, torch_dtype=torch.bfloat16,
-        load_in_8bit=args.load_in_8bit, **kwargs).eval()
+        args.checkpoint,
+        low_cpu_mem_usage=True,
+        torch_dtype=torch.bfloat16,
+        load_in_8bit=args.load_in_8bit, 
+        **kwargs).eval()
+
     if args.rope_pos_id_version !='default':
         # add new func
         def __getitem__(self, idx):

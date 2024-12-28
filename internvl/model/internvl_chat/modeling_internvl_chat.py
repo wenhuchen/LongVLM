@@ -137,9 +137,11 @@ class InternVLChatModel(PreTrainedModel):
 
         if config.use_llm_lora:
             self.wrap_llm_lora(r=config.use_llm_lora, lora_alpha=2 * config.use_llm_lora)
+
     def init_embed(self):
         if hasattr(self,'local_posid'):
             nn.init.normal_(self.local_posid.weight, mean=0.0, std=0.02)
+
     def wrap_backbone_lora(self, r=128, lora_alpha=256, lora_dropout=0.05):
         lora_config = LoraConfig(
             r=r,

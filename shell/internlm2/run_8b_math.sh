@@ -1,6 +1,5 @@
 OUTPUT_DIR="internlm2vl_v2pe_math"
 MODEL_PATH="pretrained/InternVL2-8B"
-# MODEL_PATH="pretrained/InternVL2-2B"
 
 META_PATH="shell/data/annotation_train_math.json"
 
@@ -22,7 +21,7 @@ torchrun --nproc_per_node=8 internvl/train/internvl_chat_finetune.py \
   --dataloader_num_workers 3 \
   --bf16 True \
   --num_train_epochs 1 \
-  --max_steps 10000 \
+  --max_steps 4000 \
   --per_device_train_batch_size 1 \
   --gradient_accumulation_steps 1 \
   --evaluation_strategy "no" \
@@ -56,4 +55,5 @@ torchrun --nproc_per_node=8 internvl/train/internvl_chat_finetune.py \
   --num_images_expected 32 \
   --max_buffer_size 10 \
   --max_packed_tokens 16000 \
+  --resume_from_checkpoint internlm2vl_v2pe_math/checkpoint-1600/ \
   2>&1 | tee output_file.txt

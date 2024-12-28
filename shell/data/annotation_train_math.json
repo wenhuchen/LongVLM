@@ -5,5 +5,12 @@
         "data_augment": true,
         "repeat_time": 1,
         "length": 24000
+    },
+    "VisualWebInstruct_Long": {
+        "root": "/data/wenhu/V2PE/dataset/image/visual_webinstruct/train",
+        "annotation": "/data/wenhu/V2PE/dataset/train_visual_webinstruct_long.jsonl",
+        "data_augment": true,
+        "repeat_time": 1,
+        "length": 24000
     }
 }
