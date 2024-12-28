@@ -1,10 +1,6 @@
-![LOGO](http://opencompass.openxlab.space/utils/MMLB.jpg)
-
 <b>A Toolkit for Evaluating Large Vision-Language Models. </b>
 
 [![][github-contributors-shield]][github-contributors-link] • [![][github-forks-shield]][github-forks-link] • [![][github-stars-shield]][github-stars-link] • [![][github-issues-shield]][github-issues-link] • [![][github-license-shield]][github-license-link]
-
-English | [简体中文](/docs/zh-CN/README_zh-CN.md) | [日本語](/docs/ja/README_ja.md)
 
 <a href="https://rank.opencompass.org.cn/leaderboard-multimodal">🏆 OC Learderboard </a> •
 <a href="#%EF%B8%8F-quickstart">🏗️Quickstart </a> •
@@ -39,7 +35,7 @@ English | [简体中文](/docs/zh-CN/README_zh-CN.md) | [日本語](/docs/ja/REA
 
 ## 🏗️ QuickStart
 
-See [[QuickStart](/docs/en/Quickstart.md) | [快速开始](/docs/zh-CN/Quickstart.md)] for a quick start guide.
+See [QuickStart](https://raw.githubusercontent.com/wenhuchen/LongVLM/refs/heads/main/VLMEvalKit/docs/en/Quickstart.md) for a quick start guide.
 
 ## 📊 Datasets, Models, and Evaluation Results
 
@@ -117,10 +113,6 @@ Here is a [contributor list](/docs/en/Contributors.md) we curated based on the r
 
 ## 🖊️ Citation
 
-If you find this work helpful, please consider to **star🌟** this repo. Thanks for your support!
-
-[![Stargazers repo roster for @open-compass/VLMEvalKit](https://reporoster.com/stars/open-compass/VLMEvalKit)](https://github.com/open-compass/VLMEvalKit/stargazers)
-
 If you use VLMEvalKit in your research or wish to refer to published OpenSource evaluation results, please use the following BibTeX entry and the BibTex entry corresponding to the specific VLM / benchmark you used.
 
 ```bib
@@ -132,16 +124,3 @@ If you use VLMEvalKit in your research or wish to refer to published OpenSource 
   year={2024}
 }
 ```
-
-<p align="right"><a href="#top">🔝Back to top</a></p>
-
-[github-contributors-link]: https://github.com/open-compass/VLMEvalKit/graphs/contributors
-[github-contributors-shield]: https://img.shields.io/github/contributors/open-compass/VLMEvalKit?color=c4f042&labelColor=black&style=flat-square
-[github-forks-link]: https://github.com/open-compass/VLMEvalKit/network/members
-[github-forks-shield]: https://img.shields.io/github/forks/open-compass/VLMEvalKit?color=8ae8ff&labelColor=black&style=flat-square
-[github-issues-link]: https://github.com/open-compass/VLMEvalKit/issues
-[github-issues-shield]: https://img.shields.io/github/issues/open-compass/VLMEvalKit?color=ff80eb&labelColor=black&style=flat-square
-[github-license-link]: https://github.com/open-compass/VLMEvalKit/blob/main/LICENSE
-[github-license-shield]: https://img.shields.io/github/license/open-compass/VLMEvalKit?color=white&labelColor=black&style=flat-square
-[github-stars-link]: https://github.com/open-compass/VLMEvalKit/stargazers
-[github-stars-shield]: https://img.shields.io/github/stars/open-compass/VLMEvalKit?color=ffcb47&labelColor=black&style=flat-square
