@@ -6,7 +6,7 @@
 
 import copy
 
-from internvl.model.internlm2.configuration_internlm2 import InternLM2Config
+from .configuration_internlm2 import InternLM2Config
 from transformers import LlamaConfig, Qwen2Config
 from transformers.configuration_utils import PretrainedConfig
 from transformers.utils import logging

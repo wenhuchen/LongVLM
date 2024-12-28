@@ -9,13 +9,12 @@ from typing import Any, List, Optional, Tuple, Union
 import torch.distributed as dist
 import torch.utils.checkpoint
 import transformers
-from internvl.conversation import get_conv_template
-from internvl.model.internlm2.modeling_internlm2 import InternLM2ForCausalLM
+from .conversation import get_conv_template
+from .modeling_internlm2 import InternLM2ForCausalLM
 from peft import LoraConfig, get_peft_model
 from torch import nn
 from torch.nn import CrossEntropyLoss
-from transformers import (AutoModel, GenerationConfig, LlamaForCausalLM,
-                          LlamaTokenizer, Qwen2ForCausalLM)
+from transformers import (GenerationConfig, LlamaForCausalLM, Qwen2ForCausalLM)
 from transformers.modeling_outputs import CausalLMOutputWithPast
 from transformers.modeling_utils import PreTrainedModel
 from transformers.utils import ModelOutput, logging
@@ -33,12 +32,14 @@ def version_cmp(v1, v2, op='eq'):
     from packaging import version
     op_func = getattr(operator, op)
     return op_func(version.parse(v1), version.parse(v2))
+
 def extract_local(value, rank, world_size, dim=1):
     value_chunks = value.chunk(2 * world_size, dim=dim)
     local_value = torch.cat(
         [value_chunks[rank], value_chunks[2 * world_size - rank - 1]], dim=dim
     )
     return local_value.to(value.device)
+
 def extract_local2(value, rank, world_size,  dim=1):
     dimension_size = value.shape[dim]
     sub_seq_length = dimension_size // world_size
@@ -48,6 +49,7 @@ def extract_local2(value, rank, world_size,  dim=1):
     local_value = value[:, sub_seq_start:sub_seq_end]
 
     return local_value.to(value.device)
+
 class GatherLayer(torch.autograd.Function):
     """Gather tensors from all process, supporting backward propagation."""
 
@@ -270,6 +272,7 @@ class InternVLChatModel(PreTrainedModel):
                     loss_weight=extract_local(torch.tensor(loss_weight),dist.get_rank(group),dist.get_world_size(group))
                     loss_weight=list(loss_weight.numpy())
                 attention_mask=attention_mask//dist.get_world_size(group)
+
         outputs = self.language_model(
             inputs_embeds=input_embeds,
             attention_mask=attention_mask,
@@ -622,6 +625,7 @@ class InternVLChatModel(PreTrainedModel):
         )
 
         return outputs
+
     def update_log(self, new_log_dict):
         if not hasattr(self, 'log_dict'):
             self.log_dict = {}
@@ -700,6 +704,7 @@ def get_rope_pos_id(ret, num_tiles, dtype, rope_pos_id_version='default', positi
 
     rope_pos_id_list=[_.to('cpu') for _ in rope_pos_id_list]
     rope_pos_id = torch.cat(rope_pos_id_list).to(dtype=dtype)
+
     if rope_pos_id_version == 'default':
         rope_pos_id = rope_pos_id.long()
         assert torch.equal(rope_pos_id, position_id.to(rope_pos_id.device)), (rope_pos_id, position_id.to(rope_pos_id.device))

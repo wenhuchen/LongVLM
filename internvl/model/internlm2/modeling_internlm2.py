@@ -35,7 +35,6 @@ from transformers.modeling_utils import PreTrainedModel
 from transformers.utils import (add_start_docstrings,
                                 add_start_docstrings_to_model_forward, logging,
                                 replace_return_docstrings)
-from internvl.train.compress_seq_trainer import chunk_with_boundaries
 try:
     from transformers.generation.streamers import BaseStreamer
 except:  # noqa # pylint: disable=bare-except
@@ -61,6 +60,7 @@ try:
     has_flash_attn = True
 except:
     has_flash_attn = False
+
 class AttentionPooling(nn.Module):
     def __init__(self, input_dim, n_prime):
 
@@ -76,6 +76,7 @@ class AttentionPooling(nn.Module):
         output = torch.einsum('bni,bnd->bid', attention_weights, x)
 
         return output
+
 class TopKPooling(nn.Module):
     def __init__(self, input_dim, n_prime):
 
@@ -96,6 +97,7 @@ class TopKPooling(nn.Module):
         output = selected_x * attention_weights  # (batch_size, n_prime, input_dim)
 
         return output
+
 class LayerScale(nn.Module):
     def __init__(
             self,
@@ -109,6 +111,7 @@ class LayerScale(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x.mul_(self.gamma) if self.inplace else x * self.gamma
+
 class Sigmoid(nn.Module):
     def __init__(
             self,
@@ -121,6 +124,7 @@ class Sigmoid(nn.Module):
         self.gate = nn.Parameter(init_values * torch.ones(dim))
     def forward(self, x1,x2):
         return x1*torch.sigmoid(self.gate)+x2*(1-torch.sigmoid(self.gate))
+
 def _import_flash_attn():
     global flash_attn_func, flash_attn_varlen_func
     global pad_input, index_first_axis, unpad_input
@@ -137,6 +141,50 @@ def _import_flash_attn():
     except ImportError:
         raise ImportError('flash_attn is not installed.')
 
+def chunk_with_boundaries(total_length, boundaries, n, chunked_lengths=None):
+    boundaries_list = boundaries.tolist()
+    for i in range(len(boundaries_list)):
+        if boundaries_list[i][-1] != total_length:
+            boundaries_list[i].append(total_length)
+
+    chunk_size = total_length // n
+    extra = total_length % n
+
+    new_boundaries = [[] for _ in range(n)]
+
+    for batch_idx in range(len(boundaries_list)):
+        current_start = 0
+        batch_boundaries = boundaries_list[batch_idx]
+
+        for i in range(n):
+            if chunked_lengths:
+                current_end = current_start + chunked_lengths[i]
+            else:
+                current_end = current_start + chunk_size + (1 if i < extra else 0)
+
+            chunk_boundary = [max(0, b - current_start) for b in batch_boundaries if current_start <= b <= current_end]
+            if len(chunk_boundary)==0:
+                chunk_boundary=[0,current_end-current_start]
+
+            if chunk_boundary and chunk_boundary[-1] != current_end - current_start:
+                chunk_boundary.append(current_end - current_start)
+            # first should be 0
+            if chunk_boundary and chunk_boundary[0] != 0:
+                chunk_boundary.insert(0, 0)
+
+            new_boundaries[i].append(torch.tensor(chunk_boundary))
+
+            current_start = current_end
+    tensor_result=[]
+    for i in range(n):
+        tensor_result.append(torch.stack(new_boundaries[i], dim=0).to(torch.int32).to(boundaries.device))
+    return tensor_result
+def extract_local(value, rank, world_size, device, dim=1):
+    value_chunks = value.chunk(2 * world_size, dim=dim)
+    local_value = torch.cat(
+        [value_chunks[rank], value_chunks[2 * world_size - rank - 1]], dim=dim
+    )
+    return local_value.to(device)
 
 # Copied from transformers.models.llama.modeling_llama._get_unpad_data
 def _get_unpad_data(attention_mask):
@@ -819,6 +867,7 @@ class InternLM2FlashAttention2(InternLM2Attention):
             (cu_seqlens_q, cu_seqlens_k),
             (max_seqlen_in_batch_q, max_seqlen_in_batch_k),
         )
+
 class InternLM2CrossAttention(nn.Module):
     """Cross-attention mechanism."""
 
@@ -1819,6 +1868,7 @@ class InternLM2Model(InternLM2PreTrainedModel):
                 return self.layer_scale[idx](fuse_layer(hidden_states,compressed_data[:,(inner_idx-1)*chunk_size:inner_idx*chunk_size,:],cu_seqlens_q,cu_seqlens_k_list[inner_idx],position_ids=(position_ids[0],position_ids[1][:,(inner_idx-1)*chunk_size:inner_idx*chunk_size])))+hidden_states
         else:
             raise ValueError(f"Unknown method: {method}")
+
     def compress(self,idx,hidden_states, method='avg',final_size=FINAL_SIZE):
         if method=='avg':
             B, N, C = hidden_states.shape
