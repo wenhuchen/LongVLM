@@ -203,7 +203,7 @@ def split_model_old(model_name):
     return device_map
 
 
-def build_mcq_cot_prompt(line, prompt):
+def build_mcq_cot_prompt(prompt):
     cot_prompt = (
         "Answer the preceding multiple choice question. The last line of your response should follow "
         "this format: 'Answer: \\boxed{$LETTER}' (without quotes), where LETTER is one of the options. "
@@ -217,7 +217,7 @@ def build_mcq_cot_prompt(line, prompt):
     return prompt
 
 
-def build_qa_cot_prompt(line, prompt):
+def build_qa_cot_prompt(prompt):
     cot_prompt = (
         "Answer the preceding question. The last line of your response should follow this format: "
         "'Answer: \\boxed{$FINAL_ANSWER}' (without quotes), where 'FINAL_ANSWER' is your conclusion "
@@ -231,7 +231,16 @@ def build_qa_cot_prompt(line, prompt):
     return prompt
 
 
-def build_multi_choice_prompt(line, dataset=None):
+def build_long_cot_prompt(prompt):
+    cot_prompt = (
+        "Think step by step to answer the question. Conclude your final answers as a dictionary at the end of the response after ###"
+    )
+    prompt = prompt.replace("Answer with the option's letter from the given choices directly.", '').strip()
+    prompt = prompt + '\n' + cot_prompt
+    return prompt
+
+
+def build_multi_choice_prompt(line):
     question = line['question']
     hint = line['hint'] if ('hint' in line and not pd.isna(line['hint'])) else None
     if hint is not None:

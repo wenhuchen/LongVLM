@@ -17,10 +17,11 @@ from .utils import (build_multi_choice_prompt,
                     build_mpo_prompt,
                     build_mcq_cot_prompt,
                     build_qa_cot_prompt,
+                    build_long_cot_prompt,
                     mpo_post_processing,
                     reorganize_prompt,
-                    split_model, load_image)
-from .utils import mpo_prompt_with_final_answer, mpo_prompt_without_final_answer
+                    split_model,
+                    load_image)
 from ..base import BaseModel
 from ...dataset import DATASET_TYPE, DATASET_MODALITY
 from ...smp import *
@@ -42,6 +43,7 @@ class InternVLChat(BaseModel):
 
         self.use_mpo_prompt = use_mpo_prompt
         self.use_cot = (os.getenv('USE_COT') == '1')
+        self.use_long_cot = (os.getenv('USE_LONG_COT') == '1')
 
         self.model_path = model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, use_fast=False)
@@ -113,9 +115,11 @@ class InternVLChat(BaseModel):
             else:
                 prompt = question
         elif dataset is not None and DATASET_TYPE(dataset) == 'MCQ':
-            prompt = build_multi_choice_prompt(line, dataset)
-            if os.getenv('USE_COT') == '1':
-                prompt = build_mcq_cot_prompt(line, prompt)
+            prompt = build_multi_choice_prompt(line)
+            if self.use_cot:
+                prompt = build_mcq_cot_prompt(prompt)
+            if self.use_long_cot:
+                prompt = build_long_cot_prompt(prompt)
         elif dataset is not None and DATASET_TYPE(dataset) == 'VQA':
             question = line['question']
             if listinstr(['LLaVABench', 'WildVision'], dataset):
@@ -126,15 +130,17 @@ class InternVLChat(BaseModel):
             elif listinstr(['MathVista', 'MathVision', 'VCR', 'MTVQA', 'MMVet', 'MathVerse',
                             'MMDU', 'CRPE', 'MIA-Bench', 'MM-Math', 'DynaMath', 'QSpatial'], dataset):
                 prompt = question
-                if os.getenv('USE_COT') == '1':
-                    prompt = build_qa_cot_prompt(line, prompt)
+                if self.use_cot:
+                    prompt = build_qa_cot_prompt(prompt)
+                elif self.use_long_cot:
+                    prompt = build_long_cot_prompt(prompt)
             else:
                 prompt = question + '\nAnswer the question using a single word or phrase.'
         else:
             # VQA_ex_prompt: OlympiadBench, VizWiz
             prompt = line['question']
-            if os.getenv('USE_COT') == '1':
-                prompt = build_qa_cot_prompt(line, prompt)
+            if self.use_cot:
+                prompt = build_qa_cot_prompt(prompt)
 
         message = [dict(type='text', value=prompt)]
         message.extend([dict(type='image', value=s) for s in tgt_path])
@@ -251,7 +257,6 @@ class InternVLChat(BaseModel):
 
     def generate_inner(self, message, dataset=None):
         self.set_max_num(dataset)
-        print(f'InternVL model version: {self.version}')
         if self.version in ['V1.1', 'V1.2']:
             return self.generate_v1_2(message, dataset)
         elif self.version == 'V1.5':

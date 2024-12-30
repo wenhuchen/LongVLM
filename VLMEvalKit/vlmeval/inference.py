@@ -96,6 +96,7 @@ def infer_data(model, model_name, work_dir, dataset, out_file, verbose=False, ap
     data = data[~data['index'].isin(res)]
     lt = len(data)
 
+    # import pdb; pdb.set_trace()
     model = supported_VLM[model_name]() if isinstance(model, str) else model
 
     is_api = getattr(model, 'is_api', False)
@@ -162,12 +163,14 @@ def infer_data_job(model, work_dir, model_name, dataset, verbose=False, api_npro
     tmpl = osp.join(work_dir, '{}' + f'{world_size}_{dataset_name}.pkl')
     out_file = tmpl.format(rank)
 
+    # Starting to do the inference
     model = infer_data(
         model=model, work_dir=work_dir, model_name=model_name, dataset=dataset,
         out_file=out_file, verbose=verbose, api_nproc=api_nproc)
     if world_size > 1:
         dist.barrier()
 
+    # Post processing
     if rank == 0:
         data_all = {}
         for i in range(world_size):
@@ -183,6 +186,7 @@ def infer_data_job(model, work_dir, model_name, dataset, verbose=False, api_npro
         dump(data, result_file)
         for i in range(world_size):
             os.remove(tmpl.format(i))
+
     if world_size > 1:
         dist.barrier()
     return model
