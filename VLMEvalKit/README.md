@@ -21,7 +21,7 @@ See [QuickStart](https://github.com/wenhuchen/LongVLM/blob/main/VLMEvalKit/docs/
 
 Some sample commands:
 ```
-torchrun --nproc-per-node=8 run.py --data MMMU_DEV_VAL --model internvl_2_5
+torchrun --nproc-per-node=8 run.py --data MMMU_DEV_VAL --model InternVL2_5-8B
 ```
 
 ## 📊 Datasets, Models, and Evaluation Results
