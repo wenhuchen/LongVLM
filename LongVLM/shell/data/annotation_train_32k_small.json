@@ -1,0 +1,9 @@
+{
+    "LongMRCounting": {
+        "root": "/data/wenhu/V2PE/dataset/image/long_mr/train",
+        "annotation": "/data/wenhu/V2PE/dataset/train_long_mr_image_counting_16_32.jsonl",
+        "data_augment": true,
+        "repeat_time": 1,
+        "length": 1200
+    }
+}
