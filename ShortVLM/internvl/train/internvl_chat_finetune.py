@@ -1038,6 +1038,7 @@ def main():
     else:
         collator = concat_pad_data_collator
 
+    # training_args.dataloader_num_workers = 0
     trainer = Trainer(
         model=model,
         args=training_args,

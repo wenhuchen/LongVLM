@@ -1429,7 +1429,7 @@ def main():
             group_list=group_list,
         )
     else:
-        training_args.dataloader_num_workers = 0
+        # training_args.dataloader_num_workers = 0
         trainer = Trainer(
             model=model,
             args=training_args,
