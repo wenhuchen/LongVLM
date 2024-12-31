@@ -233,7 +233,7 @@ def build_qa_cot_prompt(prompt):
 
 def build_long_cot_prompt(prompt):
     cot_prompt = (
-        "Think step by step to answer the question. Conclude your final answers as a dictionary at the end of the response after ###"
+        "Think step by step to answer the question. Conclude your final answer at the end of the response after ###"
     )
     prompt = prompt.replace("Answer with the option's letter from the given choices directly.", '').strip()
     prompt = prompt + '\n' + cot_prompt

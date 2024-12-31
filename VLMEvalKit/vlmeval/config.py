@@ -197,7 +197,7 @@ internvl_series = {
     'InternVL2_5-2B': partial(InternVLChat, model_path='OpenGVLab/InternVL2_5-2B', version='V2.0'),
     'InternVL2_5-4B': partial(InternVLChat, model_path='OpenGVLab/InternVL2_5-4B', version='V2.0'),
     'InternVL2_5-8B': partial(InternVLChat, model_path='OpenGVLab/InternVL2_5-8B', version='V2.0'),
-    'InternVL2_5-8B-Thinking': partial(InternVLChat, model_path='/data/wenhu/internvl_chat/work_dirs/internvl_chat_v2_5/internvl2_5_8b_dynamic_res_finetune_full_decorated_prompt', version='V2.0'),
+    'InternVL2_5-8B-Thinking': partial(InternVLChat, model_path='/data/wenhu/work_dirs/internvl_chat_v2_5/internvl2_5_8b_dynamic_res_finetune_full_long_cot', version='V2.0'),
     'InternVL2_5-26B': partial(InternVLChat, model_path='OpenGVLab/InternVL2_5-26B', version='V2.0'),
     'InternVL2_5-38B': partial(InternVLChat, model_path='OpenGVLab/InternVL2_5-38B', version='V2.0'),
     'InternVL2_5-78B': partial(InternVLChat, model_path='OpenGVLab/InternVL2_5-78B', version='V2.0'),
