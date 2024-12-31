@@ -18,11 +18,11 @@ def parse_args():
 
 
 # Only API model is accepted
-def infer_data_api(model, work_dir, model_name, dataset, samples_dict={}, api_nproc=4):
+def infer_data_api(model, model_name, work_dir, dataset, samples_dict={}, api_nproc=4):
+    assert not isinstance(model, str), model
     rank, world_size = get_rank_and_world_size()
     assert rank == 0 and world_size == 1
     dataset_name = dataset.dataset_name
-    model = supported_VLM[model_name]() if isinstance(model, str) else model
     assert getattr(model, 'is_api', False)
 
     indices = list(samples_dict.keys())
@@ -49,6 +49,7 @@ def infer_data_api(model, work_dir, model_name, dataset, samples_dict={}, api_np
 
 
 def infer_data(model, model_name, work_dir, dataset, out_file, verbose=False, api_nproc=4):
+    assert not isinstance(model, str), model
     res = load(out_file) if osp.exists(out_file) else {}
     rank, world_size = get_rank_and_world_size()
     dataset_name = dataset.dataset_name
@@ -62,15 +63,13 @@ def infer_data(model, model_name, work_dir, dataset, out_file, verbose=False, ap
         return model
     sample_indices_subrem = [x for x in sample_indices_sub if x not in res]
 
-    model = supported_VLM[model_name]() if isinstance(model, str) else model
-
     is_api = getattr(model, 'is_api', False)
     if is_api:
         assert world_size == 1
         supp = infer_data_api(
             model=model,
-            work_dir=work_dir,
             model_name=model_name,
+            work_dir=work_dir,
             dataset=dataset,
             samples_dict={k: sample_map[k] for k in sample_indices_subrem},
             api_nproc=api_nproc)
@@ -78,7 +77,6 @@ def infer_data(model, model_name, work_dir, dataset, out_file, verbose=False, ap
             assert k in supp
         res.update(supp)
         dump(res, out_file)
-        return model
 
     assert not getattr(dataset, 'pack', False), 'Current model not supported pack mode!'
     for i, idx in tqdm(enumerate(sample_indices_subrem)):
@@ -126,10 +124,8 @@ def infer_data(model, model_name, work_dir, dataset, out_file, verbose=False, ap
 
     res = {k: res[k] for k in sample_indices_sub}
     dump(res, out_file)
-    return model
 
 
-# A wrapper for infer_data, do the pre & post processing
 def infer_data_job_video(
         model,
         work_dir,
@@ -144,12 +140,12 @@ def infer_data_job_video(
     result_file = osp.join(work_dir, result_file_name)
     # Dump Predictions to Prev File if result file exists
     if osp.exists(result_file):
-        return model
+        return
 
     tmpl = osp.join(work_dir, '{}' + f'{world_size}_{osp.splitext(result_file_name)[0]}.pkl')
     out_file = tmpl.format(rank)
 
-    model = infer_data(
+    infer_data(
         model=model,
         model_name=model_name,
         work_dir=work_dir,
@@ -180,4 +176,3 @@ def infer_data_job_video(
         dump(meta, result_file)
         for i in range(world_size):
             os.remove(tmpl.format(i))
-    return model

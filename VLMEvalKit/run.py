@@ -6,9 +6,9 @@ from vlmeval.dataset.video_dataset_config import supported_video_datasets
 from vlmeval.dataset import build_dataset
 from vlmeval.inference import infer_data_job
 from vlmeval.inference_video import infer_data_job_video
-from vlmeval.inference_mt import infer_data_job_mt
 from vlmeval.smp import *
 from vlmeval.utils.result_transfer import MMMU_result_transfer, MMTBench_result_transfer
+from vlmeval.config import supported_VLM
 
 
 def build_model_from_config(cfg, model_name):
@@ -205,6 +205,11 @@ def main():
         if use_config:
             model = build_model_from_config(cfg['model'], model_name)
 
+        if model is None:
+            model = supported_VLM[model_name]()
+            print('Initialize the VLM from supported list')
+            print(model)
+
         for _, dataset_name in enumerate(args.data):
             try:
                 result_file_base = f'{model_name}_{dataset_name}.xlsx'
@@ -274,12 +279,9 @@ def main():
                 if world_size > 1:
                     dist.barrier()
 
-                if model is None:
-                    model = model_name  # which is only a name
-
                 # Perform the Inference
                 if dataset.MODALITY == 'VIDEO':
-                    model = infer_data_job_video(
+                    infer_data_job_video(
                         model,
                         work_dir=pred_root,
                         model_name=model_name,
@@ -287,17 +289,8 @@ def main():
                         result_file_name=result_file_base,
                         verbose=args.verbose,
                         api_nproc=args.nproc)
-                elif dataset.TYPE == 'MT':
-                    model = infer_data_job_mt(
-                        model,
-                        work_dir=pred_root,
-                        model_name=model_name,
-                        dataset=dataset,
-                        verbose=args.verbose,
-                        api_nproc=args.nproc,
-                        ignore_failed=args.ignore)
                 else:
-                    model = infer_data_job(
+                    infer_data_job(
                         model,
                         work_dir=pred_root,
                         model_name=model_name,
