@@ -114,12 +114,14 @@ class InternVLChat(BaseModel):
                 prompt = question + ' Please answer yes or no. Answer the question using a single word or phrase.'
             else:
                 prompt = question
+
         elif dataset is not None and DATASET_TYPE(dataset) == 'MCQ':
             prompt = build_multi_choice_prompt(line)
-            if self.use_cot:
-                prompt = build_mcq_cot_prompt(prompt)
             if self.use_long_cot:
                 prompt = build_long_cot_prompt(prompt)
+            elif self.use_cot:
+                prompt = build_mcq_cot_prompt(prompt)
+
         elif dataset is not None and DATASET_TYPE(dataset) == 'VQA':
             question = line['question']
             if listinstr(['LLaVABench', 'WildVision'], dataset):
@@ -130,16 +132,19 @@ class InternVLChat(BaseModel):
             elif listinstr(['MathVista', 'MathVision', 'VCR', 'MTVQA', 'MMVet', 'MathVerse',
                             'MMDU', 'CRPE', 'MIA-Bench', 'MM-Math', 'DynaMath', 'QSpatial'], dataset):
                 prompt = question
-                if self.use_cot:
-                    prompt = build_qa_cot_prompt(prompt)
-                elif self.use_long_cot:
+                if self.use_long_cot:
                     prompt = build_long_cot_prompt(prompt)
+                elif self.use_cot:
+                    prompt = build_qa_cot_prompt(prompt)
             else:
                 prompt = question + '\nAnswer the question using a single word or phrase.'
+            
         else:
             # VQA_ex_prompt: OlympiadBench, VizWiz
-            prompt = line['question']
-            if self.use_cot:
+            prompt = question
+            if self.use_long_cot:
+                prompt = build_long_cot_prompt(prompt)
+            elif self.use_cot:
                 prompt = build_qa_cot_prompt(prompt)
 
         message = [dict(type='text', value=prompt)]
@@ -169,47 +174,6 @@ class InternVLChat(BaseModel):
             self.max_num = 24
         else:
             self.max_num = 6
-
-    def generate_v1_2(self, message, dataset=None):
-        self.INTERLEAVE = False
-        prompt, image_path = self.message_to_promptimg(message, dataset=dataset)
-        image = Image.open(image_path).convert('RGB')
-        image = image.resize((self.image_size, self.image_size))
-        image_processor = CLIPImageProcessor.from_pretrained(self.model_path)
-        pixel_values = image_processor(images=image, return_tensors='pt').pixel_values
-        pixel_values = pixel_values.to(torch.bfloat16).to(self.device)
-        with torch.no_grad():
-            response = self.model.chat(self.tokenizer, pixel_values=pixel_values,
-                                       question=prompt, generation_config=self.kwargs)
-        return response
-
-    def generate_v1_5(self, message, dataset=None):
-        image_num = len([x for x in message if x['type'] == 'image'])
-        max_num = max(1, min(self.max_num, self.total_max_num // image_num))
-        prompt = '\n'.join([x['value'] for x in message if x['type'] == 'text'])
-
-        if DATASET_MODALITY(dataset) == 'VIDEO':
-            prompt = build_video_prompt(prompt, dataset)
-
-        if image_num > 1:
-            image_path = [x['value'] for x in message if x['type'] == 'image']
-            pixel_values_list = []
-            for file_name in image_path:
-                pixel_values_list.append(load_image(file_name, max_num=max_num).to(self.device).to(torch.bfloat16))
-            pixel_values = torch.cat(pixel_values_list, dim=0)
-        elif image_num == 1:
-            image_path = [x['value'] for x in message if x['type'] == 'image'][0]
-            pixel_values = load_image(image_path, max_num=max_num).to(self.device).to(torch.bfloat16)
-        else:
-            pixel_values = None
-        with torch.no_grad():
-            response = self.model.chat(
-                self.tokenizer,
-                pixel_values=pixel_values,
-                question=prompt,
-                generation_config=self.kwargs,
-                verbose=True)
-        return response
 
     def generate_v2(self, message, dataset=None):
         use_mpo_prompt = self.use_mpo_prompt and (self.use_cot or dataset in ['MMStar', 'HallusionBench', 'OCRBench'])
@@ -257,11 +221,7 @@ class InternVLChat(BaseModel):
 
     def generate_inner(self, message, dataset=None):
         self.set_max_num(dataset)
-        if self.version in ['V1.1', 'V1.2']:
-            return self.generate_v1_2(message, dataset)
-        elif self.version == 'V1.5':
-            return self.generate_v1_5(message, dataset)
-        elif self.version == 'V2.0':
+        if self.version == 'V2.0':
             return self.generate_v2(message, dataset)
         else:
             raise ValueError(f'Unsupported version: {self.version}')
@@ -352,11 +312,7 @@ class InternVLChat(BaseModel):
     def chat_inner(self, message, dataset=None):
         self.set_max_num(dataset)
 
-        if self.version in ['V1.1', 'V1.2']:
-            raise ValueError(f'Unsupported version for Multi-Turn: {self.version}')
-        elif self.version == 'V1.5':
-            raise ValueError(f'Unsupported version for Multi-Turn: {self.version}')
-        elif self.version == 'V2.0':
+        if self.version == 'V2.0':
             kwargs_default = dict(do_sample=False, max_new_tokens=512, top_p=None, num_beams=1)
             self.kwargs = kwargs_default
             return self.chat_inner_v2(message, dataset)

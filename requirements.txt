@@ -23,3 +23,6 @@ pycocoevalcap
 editdistance
 nltk
 seaborn
+deepspeed
+timm
+peft

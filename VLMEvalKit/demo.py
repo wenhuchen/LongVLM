@@ -1,7 +1,7 @@
 import gradio as gr
 from vlmeval.vlm.internvl.internvl_chat import InternVLChat
 
-PATH='/data/wenhu/internvl_chat/work_dirs/internvl_chat_v2_5/internvl2_5_8b_dynamic_res_finetune_full_decorated_prompt/'
+PATH='/data/wenhu/work_dirs/internvl_chat_v2_5/internvl2_5_8b_dynamic_res_finetune_full_long_cot'
 
 model = InternVLChat(model_path=PATH, version='V2.0', load_in_8bit=False, use_mpo_prompt=False)
 

@@ -4,13 +4,13 @@
         "annotation": "/data/wenhu/VLMs/dataset/train_visual_webinstruct.jsonl",
         "data_augment": true,
         "repeat_time": 1,
-        "length": 24000
+        "length": 18827
     },
     "VisualWebInstruct_Long": {
         "root": "/data/wenhu/VLMs/dataset/image/visual_webinstruct/train",
         "annotation": "/data/wenhu/VLMs/dataset/train_visual_webinstruct_long.jsonl",
         "data_augment": true,
         "repeat_time": 1,
-        "length": 23000
+        "length": 22854
     }
 }

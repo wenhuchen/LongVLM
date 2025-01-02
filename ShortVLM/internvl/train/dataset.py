@@ -346,7 +346,7 @@ def preprocess(
                 conversation = conversation.replace('<image>', image_tokens, 1)
             new_conversations.append(conversation)
         conversations = new_conversations
-
+    
     # Tokenize conversations
     input_ids = tokenizer(
         conversations,
