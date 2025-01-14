@@ -93,7 +93,6 @@ if __name__ == "__main__":
         print(key)
         dataset_split = dataset[key]
         print('total length: ', len(dataset_split))
-        dataset_split = dataset_split.select(range(50))
 
         # Distribute the dataset into THREADS chunks
         splits = split_dataset(dataset_split, THREADS)
